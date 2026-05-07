@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RISE — Next-Gen Trading Platform</title>
+    
+    <!-- Icons & Fonts -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;700;800&family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+    
+    <link rel="icon" type="image/png" href="assets/rise32.png">
+    <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="homepage.css">
+</head>
+<body>
+
+    <header class="header-blur">
+        <section class="flex">
+            <a href="index.html" class="brand">
+                <img src="assets/image.png" alt="logo">
+                <span class="brand-title">RISE</span>
+            </a>
+            <nav class="nav">
+                <a href="#home">Home</a>
+                <a href="#about">About</a>
+                <a href="#reviews">Reviews</a>
+                <a href="#graphs">Markets</a>
+            </nav>
+            <a href="login.html" class="btn-cta">Get started</a>
+        </section>
+    </header>
+
+    <div class="home" id="home">
+        <video id="bg-video" autoplay loop muted playsinline>
+            <source src="assets/Video2.mp4" type="video/mp4">
+        </video>
+        
+        <div class="hero-new reveal">
+            <h1 class="hero-title-new">TRADE THE <br><span class="accent">FUTURE</span></h1>
+            <p class="hero-sub-new">Master the markets with institutional-grade AI, lightning-fast execution, and a community of elite traders.</p>
+            <div class="hero-btns">
+                <a href="login.html" class="cta-primary">Launch Terminal</a>
+            </div>
+        </div>
+
+        <div class="ticker-wrap">
+            <div class="ticker-track" id="ticker">
+                <div class="ticker-item"><span class="is-up">AAPL +2.4%</span></div>
+                <div class="ticker-item"><span class="is-down">TSLA -1.2%</span></div>
+                <div class="ticker-item"><span class="is-up">NVDA +4.1%</span></div>
+                <div class="ticker-item"><span class="is-up">MSFT +0.8%</span></div>
+                <div class="ticker-item"><span class="is-down">BTC -0.5%</span></div>
+                <div class="ticker-item"><span class="is-up">ETH +2.2%</span></div>
+                <!-- Duplicate for seamless scroll -->
+                <div class="ticker-item"><span class="is-up">AAPL +2.4%</span></div>
+                <div class="ticker-item"><span class="is-down">TSLA -1.2%</span></div>
+                <div class="ticker-item"><span class="is-up">NVDA +4.1%</span></div>
+                <div class="ticker-item"><span class="is-up">MSFT +0.8%</span></div>
+                <div class="ticker-item"><span class="is-down">BTC -0.5%</span></div>
+                <div class="ticker-item"><span class="is-up">ETH +2.2%</span></div>
+            </div>
+        </div>
+    </div>
+
+    <section class="services reveal">
+        <p class="section-label">Platform Features</p>
+        <h2 class="section-heading">Everything you need to <em>grow</em></h2>
+        <div class="box-container">
+            <div class="box">
+                <i class="bi bi-graph-up-arrow"></i>
+                <h3>Grow Your Wealth</h3>
+                <p>Invest in high-growth markets with smart strategies designed to maximize your long-term returns.</p>
+            </div>
+            <div class="box">
+                <i class="bi bi-lightbulb"></i>
+                <h3>AI Smart Advisor</h3>
+                <p>Get AI driven insights and expert guidance to make confident financial suggestions.</p>
+            </div>
+            <div class="box">
+                <i class="bi bi-shield-check"></i>
+                <h3>Secure Platform</h3>
+                <p>Advanced encryption and multi-layer protection keep your investments completely safe.</p>
+            </div>
+            <div class="box">
+                <i class="bi bi-credit-card"></i>
+                <h3>Instant Payments</h3>
+                <p>Deposit and invest instantly with seamless and secure payment integrations.</p>
+            </div>
+            <div class="box">
+                <i class="bi bi-wallet2"></i>
+                <h3>Fast Withdrawals</h3>
+                <p>Access your funds anytime with quick and hassle-free withdrawal processes.</p>
+            </div>
+            <div class="box">
+                <i class="bi bi-headset"></i>
+                <h3>24/7 Support</h3>
+                <p>Our support team is always available to help you whenever you need assistance.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="about-new" id="about">
+        <div class="container">
+            <p class="section-label reveal">Our Mission</p>
+            <div class="about-grid">
+                <div class="about-text reveal">
+                    <h2 class="section-heading">Built by traders, <br><em>for traders</em></h2>
+                    <p>RISE was built from the ground up with one belief: that sophisticated market tools shouldn't be reserved for Wall Street. We've democratized access to institutional-grade intelligence.</p>
+                    <p>From AI-driven trade coaching to real-time market feeds, every feature is engineered to give you an edge — whether you're making your first trade or your ten-thousandth.</p>
+                    <p>Our platform adapts to you. The more you use RISE, the smarter it gets at anticipating your needs, flagging your opportunities, and protecting your positions.</p>
+                    <a href="login.html" class="btn-cta" style="display:inline-block;margin-top:24px;">Join RISE Today</a>
+                </div>
+                <div class="about-visual reveal">
+                    <img src="assets/image2.jpeg" alt="Trading platform">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="reviews reveal" id="reviews">
+        <p class="section-label">Testimonials</p>
+        <h2 class="section-heading">Loved by <em>traders</em> worldwide</h2>
+        <div class="reviews-slider">
+            <div class="reviews-track">
+                <!-- Card 1 -->
+                <div class="review-card">
+                    <div class="review-user">
+                        <img src="assets/harshad.jpeg" alt="Harshad Mehta">
+                        <div>
+                            <h4>Harshad Mehta</h4>
+                        </div>
+                    </div>
+                    <hr class="review-divider">
+                    <p class="review-text">"Harshad Mehta's stock market wisdom: blend astute analysis with calculated risk, navigating the market's ebbs and flows."</p>
+                </div>
+                <!-- Card 2 -->
+                <div class="review-card">
+                    <div class="review-user">
+                        <img src="assets/bill.jpeg" alt="Warren Buffet">
+                        <div>
+                            <h4>Warren Buffet</h4>
+                        </div>
+                    </div>
+                    <hr class="review-divider">
+                    <p class="review-text">"In the stock market maze, wisdom, patience, and knowledge guide decisions toward artful investment."</p>
+                </div>
+                <!-- Card 3 -->
+                <div class="review-card">
+                    <div class="review-user">
+                        <img src="assets/rakesh.jpeg" alt="Rakesh Jhunjhunwala">
+                        <div>
+                            <h4>Rakesh Jhunjhunwala</h4>
+                        </div>
+                    </div>
+                    <hr class="review-divider">
+                    <p class="review-text">"In the realm of stocks, Rakesh Jhunjhunwala crafts wealth through insight, courage, and strategic vision."</p>
+                </div>
+                <!-- Card 4 -->
+                <div class="review-card">
+                    <div class="review-user">
+                        <img src="assets/DP.png" alt="Mr Yogendra">
+                        <div>
+                            <h4>Mr Yogendra</h4>
+                        </div>
+                    </div>
+                    <hr class="review-divider">
+                    <p class="review-text">"The Product is Fantastic and 24/7 Support is Impeccable."</p>
+                </div>
+                <!-- Card 5 (Duplicate of 1) -->
+                <div class="review-card">
+                    <div class="review-user">
+                        <img src="assets/harshad.jpeg" alt="Harshad Mehta">
+                        <div>
+                            <h4>Harshad Mehta</h4>
+                        </div>
+                    </div>
+                    <hr class="review-divider">
+                    <p class="review-text">"Harshad Mehta's stock market wisdom: blend astute analysis with calculated risk, navigating the market's ebbs and flows."</p>
+                </div>
+                <!-- Card 6 (Duplicate of 2) -->
+                <div class="review-card">
+                    <div class="review-user">
+                        <img src="assets/bill.jpeg" alt="Warren Buffet">
+                        <div>
+                            <h4>Warren Buffet</h4>
+                        </div>
+                    </div>
+                    <hr class="review-divider">
+                    <p class="review-text">"In the stock market maze, wisdom, patience, and knowledge guide decisions toward artful investment."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NUMBERS SECTION -->
+    <div class="numbers-section reveal">
+        <div class="numbers-inner">
+            <div class="num-box">
+                <div class="num-val">500K+</div>
+                <div class="num-label">Active Traders</div>
+            </div>
+            <div class="num-box">
+                <div class="num-val">$2.4B</div>
+                <div class="num-label">Volume Traded</div>
+            </div>
+            <div class="num-box">
+                <div class="num-val">99.9%</div>
+                <div class="num-label">Uptime</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stocks" id="graphs">
+        <div class="container">
+            <p class="section-label reveal">Live Markets</p>
+            <h2 class="section-heading reveal">Today's <em>top movers</em></h2>
+            <div class="grid">
+            <div class="card">
+                <div class="card-top">Apple <span>NASDAQ: AAPL</span></div>
+                <div class="tradingview-widget-container" style="height:200px">
+                    <div class="tradingview-widget-container__widget" style="height:100%"></div>
+                    <script src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js">
+                        { "symbol": "NASDAQ:AAPL", "width": "100%", "height": "100%", "colorTheme": "dark", "isTransparent": true, "dateRange": "1M" }
+                    </script>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-top">Microsoft <span>NASDAQ: MSFT</span></div>
+                <div class="tradingview-widget-container" style="height:200px">
+                    <script src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js">
+                        { "symbol": "NASDAQ:MSFT", "width": "100%", "height": "100%", "colorTheme": "dark", "isTransparent": true, "dateRange": "1M" }
+                    </script>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-top">Google <span>NASDAQ: GOOGL</span></div>
+                <div class="tradingview-widget-container" style="height:200px">
+                    <script src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js">
+                        { "symbol": "NASDAQ:GOOGL", "width": "100%", "height": "100%", "colorTheme": "dark", "isTransparent": true, "dateRange": "1M" }
+                    </script>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-top">Meta <span>NASDAQ: META</span></div>
+                <div class="tradingview-widget-container" style="height:200px">
+                    <script src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" >
+                        { "symbol": "NASDAQ:META", "width": "100%", "height": "100%", "colorTheme": "dark", "isTransparent": true, "dateRange": "1M" }
+                    </script>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-top">Tesla <span>NASDAQ: TSLA</span></div>
+                <div class="tradingview-widget-container" style="height:200px">
+                    <script src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" >
+                        { "symbol": "NASDAQ:TSLA", "width": "100%", "height": "100%", "colorTheme": "dark", "isTransparent": true, "dateRange": "1M" }
+                    </script>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-top">Amazon <span>NASDAQ: AMZN</span></div>
+                <div class="tradingview-widget-container" style="height:200px">
+                    <script src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js">
+                        { "symbol": "NASDAQ:AMZN", "width": "100%", "height": "100%", "colorTheme": "dark", "isTransparent": true, "dateRange": "1M" }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- CTA BANNER -->
+    <div class="cta-banner">
+        <div class="cta-banner-inner reveal">
+            <h2 class="cta-banner-title">READY TO <span>RISE?</span></h2>
+            <p>Join thousands of traders who have already upgraded their intelligence. No credit card required to start your journey.</p>
+            <a href="login.html" class="cta-primary">Create Free Account</a>
+        </div>
+    </div>
+
+    <footer class="footer-new">
+        <div class="footer-grid">
+            <div>
+                <a href="index.html" class="footer-brand">
+                    <img src="assets/image.png" alt="logo">
+                    <span>RISE</span>
+                </a>
+                <p class="footer-desc">The next-generation trading platform built on AI, speed, and unwavering security. Your wealth starts here.</p>
+            </div>
+            <div>
+                <div class="footer-heading">Navigate</div>
+                <div class="footer-links">
+                    <a href="#home">Home</a>
+                    <a href="#about">About</a>
+                    <a href="#reviews">Reviews</a>
+                    <a href="#graphs">Markets</a>
+                </div>
+            </div>
+            <div>
+                <div class="footer-heading">Account</div>
+                <div class="footer-links">
+                    <a href="login.html">Sign In</a>
+                    <a href="login.html">Register</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms</a>
+                </div>
+            </div>
+            <div>
+                <div class="footer-heading">Contact</div>
+                <div class="footer-links">
+                    <a href="mailto:info@rise.com">info@rise.com</a>
+                    <a href="tel:+91 9XXXX XXXXX">+91 9XXXX XXXXX</a>
+                    <a href="#">GitHub</a>
+                    <a href="#">Instagram</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>Developed by Team CodeGeass&reg; | All rights reserved.</span>
+        </div>
+    </footer>
+
+    <script src="index.js"></script>
+</body>
+</html>

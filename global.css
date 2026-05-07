@@ -1,0 +1,141 @@
+:root {
+    /* Main Palette */
+    --bg: #03070f;
+    --surface: #080f1c;
+    --surface2: #0d1829;
+    --surface3: #111f33;
+    --line: #1e3045;
+    --text: #e2ecf5;
+    --muted: #4a6880;
+    --cyan: #00d4ff;
+    --cyan-dim: rgba(0, 212, 255, 0.08);
+    --gold: #f5c842;
+    --green: #00e09e;
+    --red: #ff4d6d;
+    --blue: #57a7ff;
+    --accent: #6366f1;
+    --accent-dim: rgba(99, 102, 241, .13);
+    
+    /* Legacy / Compatibility Palette */
+    --page: var(--bg);
+    --panel: var(--surface);
+    --panel-dark: #1c1c1e;
+    --panel2: var(--surface2);
+    --panel3: var(--surface3);
+    --button: #edf3f8;
+    --buttonText: #081018;
+    
+    /* Spacing & Radii */
+    --radius: 16px;
+    --radius-sm: 8px;
+    --sidebar-w: 260px;
+
+    /* Glassmorphism Theme */
+    --glass: rgba(8, 12, 20, 0.6);
+    --glass-blur: blur(16px);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+*::selection {
+    background: #fff;
+    color: #171717;
+}
+
+html, body {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', 'DM Sans', "Aptos", "Segoe UI", sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+}
+
+/* ── Typography ── */
+h1, h2, h3, h4 {
+    margin: 0;
+    font-weight: 700;
+    color: #fff;
+}
+
+h1 { font-size: 42px; }
+h2 { font-size: 24px; }
+h3 { font-size: 20px; }
+
+/* ── Shared Header ── */
+.header-blur {
+    position: sticky;
+    top: 0;
+    z-index: 10000;
+    background: rgba(3, 7, 15, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(17, 32, 51, 0.6);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    padding: 5px 24px;
+}
+
+/* ── Common Components ── */
+
+.logo, .brand, .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    color: #fff;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+}
+
+.logo img, .brand img, .nav-logo img {
+    height: 36px;
+    width: 36px;
+    object-fit: cover;
+    border-radius: 50% !important;
+    background: transparent;
+    display: block;
+}
+
+.logo span, .brand-title, .sidebar-brand span, .nav-logo span {
+    background: linear-gradient(135deg, #fff, var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+}
+
+/* ── Utilities ── */
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.text-muted {
+    color: var(--muted);
+}
+
+.up, .is-up { color: var(--green); }
+.dn, .is-down { color: var(--red); }
+
