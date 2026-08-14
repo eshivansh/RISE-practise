@@ -16,10 +16,7 @@
 }
 .sidebar-brand img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
 .sidebar-brand span {
-    background: linear-gradient(135deg, #fff, var(--cyan));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #fff;
 }
 
 .sidebar-nav { flex: 1; padding: 20px 10px; }
@@ -52,7 +49,7 @@
 .user-avatar {
     width: 36px; height: 36px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--cyan), #0077aa);
+    background: var(--cyan);
     display: flex; align-items: center; justify-content: center;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 14px;
@@ -95,3 +92,119 @@
     .activity-grid { grid-template-columns: 1fr; }
 }
 
+
+/* Improved welcome dashboard */
+.wl-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.wl-stat {
+    padding: 20px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--glass);
+}
+.wl-stat-label {
+    color: var(--muted);
+    font-size: 13px;
+}
+.wl-stat-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: #fff;
+    margin-top: 6px;
+}
+.wl-columns {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+    align-items: stretch;
+}
+.wl-panel {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--glass);
+    overflow: hidden;
+}
+.wl-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+}
+.wl-panel-head h2 {
+    font-size: 16px;
+}
+.wl-open-btn {
+    min-height: 32px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel2);
+    color: var(--text);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+}
+.wl-open-btn:hover {
+    border-color: var(--cyan);
+}
+.wl-chart {
+    height: 340px;
+}
+.wl-chart .stock-chart {
+    height: 100%;
+    min-height: 0;
+}
+.mover-list {
+    display: flex;
+    flex-direction: column;
+}
+.mover {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.mover:hover {
+    background: var(--panel3);
+}
+.mover-sym {
+    font-weight: 800;
+    color: #fff;
+    display: block;
+}
+.mover-name {
+    color: var(--muted);
+    font-size: 12px;
+    display: block;
+}
+.mover-right {
+    text-align: right;
+}
+.mover-price {
+    color: #fff;
+    font-weight: 700;
+    display: block;
+}
+.mover-chg {
+    font-size: 12px;
+}
+.mover-chg.up { color: var(--green); }
+.mover-chg.dn { color: var(--red); }
+.wl-tips .tip-list {
+    padding: 16px;
+}
+@media (max-width: 900px) {
+    .wl-stats { grid-template-columns: 1fr; }
+    .wl-columns { grid-template-columns: 1fr; }
+}
