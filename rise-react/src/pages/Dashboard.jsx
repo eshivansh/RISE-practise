@@ -1,586 +1,200 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { CONFIG } from "../config.js";
-import { stocks, nameOf, basePriceOf, baseChangeOf } from "../data/stocks.js";
-import useLocalStorage from "../hooks/useLocalStorage.js";
+import { nameOf, basePriceOf, baseChangeOf } from "../data/stocks.js";
 import StockChart from "../components/StockChart.jsx";
+import PortfolioTable from "../components/PortfolioTable.jsx";
+import { fetchStockPrice, searchStocks, askAiCoach } from "../logic/dashboardApi.js";
 import "../styles/dashboardpage.css";
 
-const chips = [
-  { label: "Explain stock", prompt: "Explain this stock in simple terms." },
-  { label: "Is it a buy?", prompt: "Based on the recent move, is this a good beginner buy?" },
-  { label: "Risk check", prompt: "What risks should I watch before buying this stock?" },
-];
+const WATCHLIST = ["AAPL", "GOOGL", "NVDA", "TSLA", "MSFT", "BA"];
 
-function markTask(id) {
-  let d = new Date();
-  let today = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
-  localStorage.setItem("rise_task_" + id + "_" + today, "1");
+function readJSON(key, fallback) {
+  const text = localStorage.getItem(key);
+  return text ? JSON.parse(text) : fallback;
 }
 
 export default function Dashboard() {
-  const [list, setList] = useState(["AAPL", "GOOGL", "NVDA", "TSLA", "MSFT", "BA"]);
   const [picked, setPicked] = useState("AAPL");
   const [prices, setPrices] = useState({});
-
-  const [cash, setCash] = useLocalStorage("rise_cash", 100000);
-  const [holdings, setHoldings] = useLocalStorage("rise_holdings", {});
   const [qty, setQty] = useState(1);
-  const [note, setNote] = useState("Pick a stock, set a quantity, then Buy or Sell.");
-
-  const [risk, setRisk] = useState("Conservative");
-  const [horizon, setHorizon] = useState("Intraday");
-  const [style, setStyle] = useState("Trend following");
-  const [trigger, setTrigger] = useState("Wait for a clean setup before entering");
-  const [stop, setStop] = useState("Step out if the idea is invalidated");
-
-  const [chatList, setChatList] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [text, setText] = useState("");
-
+  const [note, setNote] = useState("Pick a stock and place an order.");
   const [search, setSearch] = useState("");
   const [results, setResults] = useState([]);
-  const [showResults, setShowResults] = useState(false);
-  const [wait, setWait] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [chatText, setChatText] = useState("");
+  const [chatList, setChatList] = useState([]);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [cash, setCash] = useState(function () { return readJSON("rise_cash", 100000); });
+  const [holdings, setHoldings] = useState(function () { return readJSON("rise_holdings", {}); });
 
-  const searchRef = useRef(null);
-  const logRef = useRef(null);
+  useEffect(function () { localStorage.setItem("rise_cash", JSON.stringify(cash)); }, [cash]);
+  useEffect(function () { localStorage.setItem("rise_holdings", JSON.stringify(holdings)); }, [holdings]);
+  function getPrice(sym) { return prices[sym] ? prices[sym].price : basePriceOf(sym); }
+  function getChange(sym) { return prices[sym] ? prices[sym].change : baseChangeOf(sym); }
 
-  function priceOf(sym) {
-    if (prices[sym]) {
-      return prices[sym].price;
-    }
-    return basePriceOf(sym);
-  }
-
-  function changeOf(sym) {
-    if (prices[sym]) {
-      return prices[sym].change;
-    }
-    return baseChangeOf(sym);
-  }
-
-  function getPrice(sym) {
-    fetch("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=" + sym + "&apikey=" + CONFIG.marketApiKey)
-      .then((res) => res.json())
-      .then(function (data) {
-        let q = data["Global Quote"];
-        if (q && q["05. price"]) {
-          let one = {
-            price: parseFloat(q["05. price"]),
-            change: parseFloat(q["10. change percent"].replace("%", "")),
-          };
-          setPrices(function (old) {
-            let copy = { ...old };
-            copy[sym] = one;
-            return copy;
-          });
-        }
-      })
-      .catch(function () {});
+  async function loadPrice(sym) {
+    try {
+      const live = await fetchStockPrice(sym);
+      if (live) setPrices(function (old) { return { ...old, [sym]: live }; });
+    } catch (error) { /* use demo price */ }
   }
 
   useEffect(function () {
-    function refresh() {
-      let all = list.slice();
-      if (all.indexOf(picked) === -1) {
-        all.push(picked);
-      }
-      for (let i = 0; i < all.length; i++) {
-        getPrice(all[i]);
-      }
-    }
-    refresh();
-    let timer = setInterval(refresh, CONFIG.autoRefreshSeconds * 1000);
-    return function () {
-      clearInterval(timer);
-    };
-  }, [list, picked]);
-
-  useEffect(function () {
-    let q = search.trim();
-    if (q === "") {
-      setShowResults(false);
-      return;
-    }
-    setWait(true);
-    setShowResults(true);
-    let timer = setTimeout(function () {
-      fetch("https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=" + q + "&apikey=" + CONFIG.marketApiKey)
-        .then((res) => res.json())
-        .then(function (data) {
-          setWait(false);
-          let matches = data.bestMatches || [];
-          let clean = [];
-          for (let i = 0; i < matches.length; i++) {
-            clean.push({ symbol: matches[i]["1. symbol"], name: matches[i]["2. name"] });
-          }
-          setResults(clean);
-        })
-        .catch(function () {
-          setWait(false);
-        });
-    }, 500);
-    return function () {
-      clearTimeout(timer);
-    };
-  }, [search]);
-
-  useEffect(function () {
-    function onClick(e) {
-      if (searchRef.current && !searchRef.current.contains(e.target)) {
-        setShowResults(false);
-      }
-    }
-    document.addEventListener("click", onClick);
-    return function () {
-      document.removeEventListener("click", onClick);
-    };
+    WATCHLIST.forEach(loadPrice);
+    const timer = setInterval(function () { WATCHLIST.forEach(loadPrice); }, CONFIG.autoRefreshSeconds * 1000);
+    return function () { clearInterval(timer); };
   }, []);
 
   useEffect(function () {
-    if (logRef.current) {
-      logRef.current.scrollTop = logRef.current.scrollHeight;
-    }
-  }, [chatList, loading]);
+    if (search.trim() === "") { setShowSearch(false); return; }
+    const timer = setTimeout(async function () {
+      setShowSearch(true);
+      try { setResults(await searchStocks(search.trim())); }
+      catch (error) { setResults([]); }
+    }, 500);
+    return function () { clearTimeout(timer); };
+  }, [search]);
 
-  function buy() {
-    let p = priceOf(picked);
-    if (qty <= 0) {
-      setNote("Quantity must be at least 1.");
-      return;
-    }
-    let cost = p * qty;
-    if (cost > cash) {
-      setNote("Not enough cash for this buy.");
-      return;
-    }
+  function buyStock() {
+    const price = getPrice(picked);
+    const cost = price * qty;
+    if (qty < 1 || cost > cash) { setNote("Cannot buy."); return; }
     setCash(cash - cost);
-
-    let copy = { ...holdings };
+    const copy = { ...holdings };
     if (copy[picked]) {
-      let old = copy[picked];
-      let totalQty = old.qty + qty;
-      let newAvg = (old.avg * old.qty + p * qty) / totalQty;
-      copy[picked] = { qty: totalQty, avg: newAvg };
-    } else {
-      copy[picked] = { qty: qty, avg: p };
-    }
+      const old = copy[picked];
+      const total = old.qty + qty;
+      copy[picked] = { qty: total, avg: (old.avg * old.qty + price * qty) / total };
+    } else copy[picked] = { qty, avg: price };
     setHoldings(copy);
-    setNote("Bought " + qty + " " + picked + " at $" + p.toFixed(2));
-    markTask("trade");
+    setNote("Bought " + qty + " " + picked);
   }
 
-  function sell() {
-    let p = priceOf(picked);
-    if (qty <= 0) {
-      setNote("Quantity must be at least 1.");
-      return;
-    }
-    let copy = { ...holdings };
-    if (!copy[picked] || copy[picked].qty < qty) {
-      setNote("You do not have enough shares to sell.");
-      return;
-    }
-    setCash(cash + p * qty);
-
-    let left = copy[picked].qty - qty;
-    if (left === 0) {
-      delete copy[picked];
-    } else {
-      copy[picked] = { qty: left, avg: copy[picked].avg };
-    }
+  function sellStock() {
+    const price = getPrice(picked);
+    if (!holdings[picked] || holdings[picked].qty < qty) { setNote("Not enough shares."); return; }
+    setCash(cash + price * qty);
+    const copy = { ...holdings };
+    const left = copy[picked].qty - qty;
+    if (left === 0) delete copy[picked]; else copy[picked] = { qty: left, avg: copy[picked].avg };
     setHoldings(copy);
-    setNote("Sold " + qty + " " + picked + " at $" + p.toFixed(2));
-    markTask("trade");
+    setNote("Sold " + qty + " " + picked);
   }
 
-  function resetAccount() {
-    setCash(100000);
-    setHoldings({});
-    setNote("Demo account reset to $100,000.");
-  }
-
-  function askAI(msg) {
-    markTask("ai");
-    setChatList(function (old) {
-      return old.concat({ text: msg, role: "user" });
-    });
-    setLoading(true);
-
-    let extra = " (Price: $" + priceOf(picked).toFixed(2) + ", Change: " + changeOf(picked).toFixed(2) + "%)";
-    let system = "You are a concise stock trading coach for beginners.";
-    let question = "Stock: " + picked + extra + ". Strategy: " + risk + " / " + horizon + " / " + style + ". User says: " + msg;
-
-    fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=" + CONFIG.geminiApiKey, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: system }] },
-        contents: [{ parts: [{ text: question }] }],
-      }),
-    })
-      .then((res) => res.json())
-      .then(function (data) {
-        setLoading(false);
-        let reply = "Error: AI response unavailable.";
-        try {
-          reply = data.candidates[0].content.parts[0].text;
-        } catch (e) {
-          reply = "Error: AI response unavailable.";
-        }
-        setChatList(function (old) {
-          return old.concat({ text: reply, role: "assistant" });
-        });
-      })
-      .catch(function () {
-        setLoading(false);
-        setChatList(function (old) {
-          return old.concat({ text: "Error: Connection to AI coach failed.", role: "assistant" });
-        });
-      });
-  }
-
-  function sendChat(e) {
-    e.preventDefault();
-    let msg = text.trim();
-    if (msg !== "") {
-      setText("");
-      askAI(msg);
+  async function sendChat() {
+    if (chatText.trim() === "") return;
+    const msg = chatText.trim();
+    setChatText("");
+    setChatList(function (old) { return [...old, { role: "user", text: msg }]; });
+    setAiLoading(true);
+    try {
+      const reply = await askAiCoach(picked, msg);
+      setChatList(function (old) { return [...old, { role: "assistant", text: reply }]; });
+    } catch (error) {
+      setChatList(function (old) { return [...old, { role: "assistant", text: "Network error." }]; });
     }
+    setAiLoading(false);
   }
 
-  function pick(sym) {
-    markTask("chart");
-    setPicked(sym);
-    getPrice(sym);
-  }
-
-  function removeStock(e, sym) {
-    e.stopPropagation();
-    let newList = [];
-    for (let i = 0; i < list.length; i++) {
-      if (list[i] !== sym) {
-        newList.push(list[i]);
-      }
-    }
-    setList(newList);
-  }
-
-  function add(sym, name) {
-    if (!stocks[sym]) {
-      stocks[sym] = { name: name, price: 100, change: 0 };
-    }
-    setSearch("");
-    setShowResults(false);
-    setPicked(sym);
-    if (list.indexOf(sym) === -1) {
-      let newList = [sym].concat(list);
-      if (newList.length > 8) {
-        newList = newList.slice(0, 8);
-      }
-      setList(newList);
-    }
-    getPrice(sym);
-  }
-
-  let selectedPrice = priceOf(picked);
-  let selectedChange = changeOf(picked);
-  let cost = selectedPrice * qty;
-
-  let symbolsHeld = Object.keys(holdings);
-  let holdingsValue = 0;
-  for (let i = 0; i < symbolsHeld.length; i++) {
-    let sym = symbolsHeld[i];
-    holdingsValue = holdingsValue + holdings[sym].qty * priceOf(sym);
-  }
-  let equity = cash + holdingsValue;
-  let profit = equity - 100000;
-
-  let watchRows = [];
-  for (let i = 0; i < list.length; i++) {
-    let sym = list[i];
-    let ch = changeOf(sym);
-
-    let rowClass = "watch-row";
-    if (sym === picked) {
-      rowClass = "watch-row is-active";
-    }
-
-    let changeClass = "watch-change is-up";
-    let sign = "+";
-    if (ch < 0) {
-      changeClass = "watch-change is-down";
-      sign = "";
-    }
-
-    watchRows.push(
-      <button className={rowClass} key={sym} onClick={() => pick(sym)}>
-        <span>
-          <span className="watch-symbol">{sym}</span>
-          <span className="watch-name">{nameOf(sym)}</span>
-        </span>
-        <span className="watch-quote">
-          <strong>${priceOf(sym).toFixed(2)}</strong>
-          <span className={changeClass}>{sign}{ch.toFixed(2)}%</span>
-        </span>
-        <span className="watch-remove-btn" onClick={(e) => removeStock(e, sym)}>×</span>
-      </button>
-    );
-  }
-
-  let resultRows = [];
-  if (wait) {
-    resultRows.push(<div className="search-result" key="wait">Searching...</div>);
-  } else if (results.length === 0) {
-    resultRows.push(<div className="search-result" key="none">No results found</div>);
-  } else {
-    for (let i = 0; i < results.length; i++) {
-      let r = results[i];
-      resultRows.push(
-        <button className="search-result" type="button" key={r.symbol} onClick={() => add(r.symbol, r.name)}>
-          <strong>{r.symbol}</strong>
-          <span>{r.name}</span>
-        </button>
-      );
-    }
-  }
-
-  let holdingRows = [];
-  for (let i = 0; i < symbolsHeld.length; i++) {
-    let sym = symbolsHeld[i];
-    let h = holdings[sym];
-    let cur = priceOf(sym);
-    let pl = (cur - h.avg) * h.qty;
-
-    let plClass = "pl-up";
-    let plSign = "+";
-    if (pl < 0) {
-      plClass = "pl-down";
-      plSign = "-";
-    }
-
-    holdingRows.push(
-      <tr key={sym}>
-        <td>{sym}</td>
-        <td>{h.qty}</td>
-        <td>${h.avg.toFixed(2)}</td>
-        <td>${cur.toFixed(2)}</td>
-        <td className={plClass}>{plSign}${Math.abs(pl).toFixed(2)}</td>
-      </tr>
-    );
-  }
-  if (holdingRows.length === 0) {
-    holdingRows.push(
-      <tr className="empty-row" key="empty"><td colSpan={5}>No positions yet. Buy a stock to start trading.</td></tr>
-    );
-  }
-
-  let chipRows = [];
-  for (let i = 0; i < chips.length; i++) {
-    let c = chips[i];
-    chipRows.push(
-      <button type="button" key={c.label} onClick={() => askAI(c.prompt)}>{c.label}</button>
-    );
-  }
-
-  let chatRows = [];
-  for (let i = 0; i < chatList.length; i++) {
-    chatRows.push(<div className={"chat-message " + chatList[i].role} key={i}>{chatList[i].text}</div>);
-  }
-
-  let typingClass = "ai-typing";
-  if (loading) {
-    typingClass = "ai-typing active";
-  }
-
-  let resultsClass = "search-results";
-  if (showResults) {
-    resultsClass = "search-results is-open";
-  }
-
-  let bigChangeClass = "chart-change is-up";
-  let bigSign = "+";
-  if (selectedChange < 0) {
-    bigChangeClass = "chart-change is-down";
-    bigSign = "";
-  }
+  let equity = cash;
+  Object.keys(holdings).forEach(function (sym) {
+    equity += holdings[sym].qty * getPrice(sym);
+  });
 
   return (
-    <div className="app-shell dash-page">
-      <header className="app-header header-blur">
-        <div className="header-container">
-          <Link to="/" className="brand">
-            <img src="/assets/image.png" alt="logo" />
-            <span className="brand-title">RISE</span>
-          </Link>
-
-          <div className="header-center" ref={searchRef}>
-            <label className="search-wrap" htmlFor="symbol-search">
-              <i className="bi bi-search"></i>
-              <input
-                id="symbol-search"
-                type="search"
-                placeholder="Search a stock: Apple, Tesla, Microsoft..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </label>
-            <div className={resultsClass}>{resultRows}</div>
+    <div className="dash-page">
+      <header className="dash-header">
+        <div className="dash-header-inner">
+          <Link to="/" className="brand"><img src="/assets/image.png" alt="RISE logo" /><span>RISE</span></Link>
+          <div className="dash-search-box">
+            <input type="search" placeholder="Search stock..." value={search} onChange={(e) => setSearch(e.target.value)} aria-label="Search stocks" />
+            <div className={"search-dropdown" + (showSearch ? " is-open" : "")}>
+              {results.map(function (item) {
+                return (
+                  <button type="button" key={item.symbol} className="search-item" onClick={() => { setPicked(item.symbol); setSearch(""); setShowSearch(false); loadPrice(item.symbol); }}>
+                    {item.symbol} — {item.name}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-
-          <Link to="/welcome" className="header-back"><i className="bi bi-grid-1x2"></i> Home</Link>
+          <Link to="/welcome">Home</Link>
         </div>
       </header>
 
-      <main className="trade-main">
-        <div className="guide-bar">
-          <div className="guide-step"><span className="step-num">1</span> Pick a stock from the watchlist</div>
-          <div className="guide-step"><span className="step-num">2</span> Read its chart</div>
-          <div className="guide-step"><span className="step-num">3</span> Place a Buy or Sell order</div>
-          <div className="guide-step"><span className="step-num">4</span> Track your profit below</div>
+      <main className="dash-main">
+        <nav className="steps-bar" aria-label="Steps">
+          <div className="step-pill">1. Pick</div><div className="step-pill">2. Chart</div>
+          <div className="step-pill">3. Trade</div><div className="step-pill">4. Track</div>
+        </nav>
+
+        <div className="dash-grid dash-grid-top">
+          <article className="card-panel">
+            <div className="card-head"><h2>Watchlist</h2></div>
+            <div className="card-body">
+              {WATCHLIST.map(function (sym) {
+                const ch = getChange(sym);
+                return (
+                  <button type="button" key={sym} className={"stock-row" + (sym === picked ? " is-picked" : "")} onClick={() => { setPicked(sym); loadPrice(sym); }}>
+                    <span><strong>{sym}</strong><small>{nameOf(sym)}</small></span>
+                    <span className={ch >= 0 ? "up" : "dn"}>${getPrice(sym).toFixed(2)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </article>
+
+          <article className="card-panel">
+            <div className="card-head"><h2>{picked}</h2><span>${getPrice(picked).toFixed(2)}</span></div>
+            <div className="card-body"><StockChart symbol={picked} /></div>
+          </article>
+
+          <article className="card-panel">
+            <div className="card-head"><h2>Order</h2></div>
+            <form className="order-form card-body" onSubmit={(e) => { e.preventDefault(); buyStock(); }}>
+              <label htmlFor="qty">Quantity<input id="qty" type="number" min="1" value={qty} onChange={(e) => setQty(Number(e.target.value))} /></label>
+              <div className="row-between"><span>Cash</span><strong>${cash.toFixed(2)}</strong></div>
+              <div className="btn-row">
+                <button type="submit" className="btn-buy">Buy</button>
+                <button type="button" className="btn-sell" onClick={sellStock}>Sell</button>
+              </div>
+              <p className="note-text">{note}</p>
+            </form>
+          </article>
         </div>
 
-        <section className="trade-top">
-          <section className="surface watchlist-panel">
-            <div className="section-title">
-              <div><h2>Watchlist</h2></div>
+        <div className="dash-grid dash-grid-bottom">
+          <article className="card-panel">
+            <div className="card-head">
+              <h2>Portfolio</h2>
+              <button type="button" className="reset-btn" onClick={() => { setCash(100000); setHoldings({}); }}>Reset</button>
             </div>
-            <div className="watchlist">{watchRows}</div>
-          </section>
+            <div className="card-body">
+              <div className="row-between"><span>Equity</span><strong>${equity.toFixed(2)}</strong></div>
+              <PortfolioTable holdings={holdings} getPrice={getPrice} />
+            </div>
+          </article>
 
-          <section className="surface chart-panel">
-            <div className="chart-head">
-              <div className="chart-title">
-                <h2>{picked}</h2>
-                <span className="chart-name">{nameOf(picked)}</span>
+          <article className="card-panel">
+            <div className="card-head"><h2>AI Coach</h2></div>
+            <div className="card-body">
+              <div className="chat-box">
+                {chatList.map(function (msg, i) {
+                  return <div key={i} className={"chat-msg " + msg.role}>{msg.text}</div>;
+                })}
+                {aiLoading && <div className="chat-msg">Thinking...</div>}
               </div>
-              <div className="chart-quote">
-                <span className="chart-price">${selectedPrice.toFixed(2)}</span>
-                <span className={bigChangeClass}>{bigSign}{selectedChange.toFixed(2)}%</span>
+              <div className="chat-input-row">
+                <input type="text" value={chatText} onChange={(e) => setChatText(e.target.value)} placeholder="Ask AI..." />
+                <button type="button" onClick={sendChat}>Send</button>
               </div>
-              <Link to={"/stock/" + picked} className="button button-light">View details</Link>
             </div>
-            <StockChart symbol={picked} />
-          </section>
-
-          <section className="surface order-panel">
-            <div className="section-title">
-              <div><h2>Place Order</h2></div>
-            </div>
-            <div className="order-body">
-              <div className="order-row"><span>Stock</span><strong>{picked}</strong></div>
-              <div className="order-row"><span>Price</span><strong>${selectedPrice.toFixed(2)}</strong></div>
-
-              <label className="field">
-                <span>Quantity</span>
-                <input type="number" min="1" value={qty} onChange={(e) => setQty(Number(e.target.value))} />
-              </label>
-
-              <div className="order-row"><span>Estimated cost</span><strong>${cost.toFixed(2)}</strong></div>
-              <div className="order-row"><span>Cash left</span><strong>${cash.toFixed(2)}</strong></div>
-
-              <div className="buy-sell">
-                <button className="btn-buy" onClick={buy}>Buy</button>
-                <button className="btn-sell" onClick={sell}>Sell</button>
-              </div>
-
-              <div className="order-note">{note}</div>
-            </div>
-          </section>
-        </section>
-
-        <section className="trade-mid">
-          <section className="surface portfolio-panel">
-            <div className="section-title">
-              <div><h2>Demo Portfolio</h2></div>
-              <button className="button button-light" type="button" onClick={resetAccount}>Reset</button>
-            </div>
-            <div className="stats-row">
-              <div><span>Cash</span><strong>${cash.toFixed(2)}</strong></div>
-              <div><span>Equity</span><strong>${equity.toFixed(2)}</strong></div>
-              <div><span>Profit/Loss</span><strong className={profit >= 0 ? "pl-up" : "pl-down"}>{profit >= 0 ? "+" : "-"}${Math.abs(profit).toFixed(2)}</strong></div>
-            </div>
-            <div className="table-wrap">
-              <table>
-                <thead>
-                  <tr><th>Symbol</th><th>Qty</th><th>Avg</th><th>Price</th><th>P/L</th></tr>
-                </thead>
-                <tbody>{holdingRows}</tbody>
-              </table>
-            </div>
-          </section>
-        </section>
-
-        <section className="trade-bottom">
-          <section className="surface strategy-builder">
-            <div className="section-title">
-              <div><h2>Learning Plan</h2></div>
-              <button className="button button-light" type="button" onClick={() => askAI("Review my strategy plan.")}>Ask AI</button>
-            </div>
-            <label className="field">
-              <span>Risk profile</span>
-              <select value={risk} onChange={(e) => setRisk(e.target.value)}>
-                <option value="Conservative">Conservative</option>
-                <option value="Balanced">Balanced</option>
-                <option value="Aggressive">Aggressive</option>
-              </select>
-            </label>
-            <label className="field">
-              <span>Time horizon</span>
-              <select value={horizon} onChange={(e) => setHorizon(e.target.value)}>
-                <option value="Intraday">Intraday</option>
-                <option value="Swing">Swing</option>
-                <option value="Position">Position</option>
-              </select>
-            </label>
-            <label className="field">
-              <span>Style</span>
-              <select value={style} onChange={(e) => setStyle(e.target.value)}>
-                <option value="Trend following">Trend following</option>
-                <option value="Pullback continuation">Pullback continuation</option>
-                <option value="Breakout confirmation">Breakout confirmation</option>
-                <option value="Mean reversion">Mean reversion</option>
-              </select>
-            </label>
-            <label className="field">
-              <span>Entry trigger</span>
-              <input type="text" value={trigger} onChange={(e) => setTrigger(e.target.value)} />
-            </label>
-            <label className="field">
-              <span>Stop rule</span>
-              <input type="text" value={stop} onChange={(e) => setStop(e.target.value)} />
-            </label>
-          </section>
-
-          <section className="surface coach-panel">
-            <div className="section-title">
-              <div><h2>AI Trading Coach</h2></div>
-              <span className="ai-state">Ready</span>
-            </div>
-            <div className="prompt-chips">{chipRows}</div>
-            <div className="chat-log" ref={logRef}>{chatRows}</div>
-            <div className={typingClass}>
-              <div className="dot-flashing"></div>
-              <span>AI Coach is thinking...</span>
-            </div>
-            <form className="chat-form" onSubmit={sendChat}>
-              <input
-                type="text"
-                placeholder="Ask about this stock, risk, or strategy..."
-                autoComplete="off"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-              />
-              <button className="button button-dark" type="submit">Send</button>
-            </form>
-          </section>
-        </section>
+          </article>
+        </div>
       </main>
 
-      <footer className="app-footer">
-        <span>Educational demo trading only — no real money involved. Developed By Team CodeGeass&reg;</span>
-      </footer>
+      <footer className="dash-footer"><small>Demo only — no real money</small></footer>
     </div>
   );
 }
