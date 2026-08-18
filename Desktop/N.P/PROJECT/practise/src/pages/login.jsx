@@ -13,6 +13,8 @@ export default function Login() {
   const [regPass, setRegPass] = useState("");
   const [regError, setRegError] = useState("");
 
+
+
   useEffect(function () {
     if (!localStorage.getItem("rise_user")) {
       localStorage.setItem("rise_user", JSON.stringify({ name: "Demo Trader", email: "demo@rise.com", pass: "demo1234" }));
@@ -111,7 +113,7 @@ export default function Login() {
         </section>
       </main>
 
-      <footer><small>Team CodeGeass® | © 2026 RISE — Educational demo only</small></footer>
+      <footer><small>Team Shivansh® | © 2026 RISE — Educational demo only</small></footer>
     </div>
   );
 }
