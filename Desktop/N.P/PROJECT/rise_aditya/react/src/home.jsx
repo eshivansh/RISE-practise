@@ -249,7 +249,7 @@ export default function Home() {
           </div>
         </div>
         <div className="footer-bottom">
-          <span>Developed by Team CodeGeass&reg; | All rights reserved.</span>
+          <span>Built with passion by Team CodeGeass&reg; | All rights reserved.</span>
         </div>
       </footer>
     </div>
